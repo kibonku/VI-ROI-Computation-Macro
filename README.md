@@ -31,11 +31,7 @@ JSON_to_RoI -j "/path/to/jsonfile.json" -i "path/to/inputfolder" -o "path/to/out
 ```
 
 ### References
-- https://arxiv.org/pdf/2005.09007.pdf
-- https://github.com/NathanUA/U-2-Net
-- https://github.com/pymatting/pymatting
-- https://github.com/danielgatis/rembg
-- https://github.com/ecsplendid/rembg-greenscreen
-- https://superuser.com/questions/1647590/have-ffmpeg-merge-a-matte-key-file-over-the-normal-video-file-removing-the-backg
-- https://superuser.com/questions/1648680/ffmpeg-alphamerge-two-videos-into-a-gif-with-transparent-background/1649339?noredirect=1#comment2522687_1649339
-- https://superuser.com/questions/1649817/ffmpeg-overlay-a-video-after-alphamerging-two-others/1649856#1649856
+- https://doc.qt.io/qt-5/qtexamplesandtutorials.html
+- https://docs.opencv.org/4.5.2/
+- https://docs.python.org/ko/3.7/library/argparse.html
+- https://xlsxwriter.readthedocs.io/
