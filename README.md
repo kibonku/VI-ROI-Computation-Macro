@@ -1,4 +1,4 @@
-# NDVI RoI Macro
+# VI-RoI-Computation-Macro
 
 ### 1. Intro
 * The macro was developed utilizing PyQt5 1, a Python-based binding for the Qt cross-platform application toolkit, which enables batch image processing and data transformation capabilities. 
