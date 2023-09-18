@@ -11,7 +11,7 @@
 * XlsxWriter: latest one would be preferred
 * pandas: latest one would be preferred
 
-For example:
+In my case:
 
 ```
 Python == 3.8.12
