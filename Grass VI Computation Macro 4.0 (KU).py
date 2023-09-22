@@ -77,7 +77,7 @@ class KUWindow(QWidget):
         
         ### Initialization
         # layout size
-        self.w, self.h = 1150, 880   # img size..?                  
+        self.w, self.h = 1150, 880                 
         # box
         self.box = None   
         self.box_id = 0  # box.setData(self.box_id, self.box_id)  # void QGraphicsItem::setData(int key, const QVariant &value)  @ https://doc.qt.io/qt-5/qgraphicsitem.html#setData
@@ -101,7 +101,7 @@ class KUWindow(QWidget):
         
         ## set widget size
         self.setGeometry(0,0,1900,1000)
-        self.setFixedSize(1900,1000)  # 창 크기 고정. 동적 x
+        self.setFixedSize(1900,1000)  # fixed the size of the widget
 
         # Defining a scene rect of wxh, with it's origin at 0,0.
         # If we don't set this on creation, we can set it later with .setSceneRect
@@ -276,7 +276,7 @@ class KUWindow(QWidget):
             # value = abs(int(self.zoom.y()))
             value = int(self.zoom.y())
             self.rotate_box(value)
-        else: # 이건 다른 기능으로 쓰게 남겨두기
+        else: 
             self.deg += e.angleDelta() / 8
             degtxt  = f'Deg X:{self.deg.x()}, Deg Y:{self.deg.y()}'
             # print('degtxt : ', degtxt)
@@ -287,7 +287,7 @@ class KUWindow(QWidget):
     def select_save_folder(self):
         
         self.save_dir = QFileDialog.getExistingDirectory(self, 'Open Folder', 'C:\\')  
-        self.save_folder_text .setText(self.save_dir)  # 폴더 경로, <edit_Folder>에 출력하기       
+        self.save_folder_text .setText(self.save_dir)        
                 
     def select_folder(self):
         
@@ -419,7 +419,7 @@ class KUWindow(QWidget):
         self.box.setPen(pen)
         pen.setWidth(2)
         
-        ## N등분 위해서 line item 생성
+        ## generate a line item to divide it into N
         for i in range(N):
             line = QGraphicsLineItem(self.w_box/N*(N-i),0, self.w_box/N*(N-i),self.h_box)
             line.setParentItem(self.box)
@@ -430,10 +430,9 @@ class KUWindow(QWidget):
         items = self.scene.selectedItems()
         for item in items:
             
-            # 화면에서 없어지게
             self.scene.removeItem(item) 
             
-            # box_id 전으로 초기화
+            # undo
             self.box_id -= 1  
     
     def RotateCoordinate(self, org_pt, theta, standart_pt):
