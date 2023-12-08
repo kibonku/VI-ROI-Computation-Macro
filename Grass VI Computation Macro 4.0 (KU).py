@@ -6,6 +6,7 @@ import re
 import cv2, numpy as np
 import pandas as pd
 import json
+from PIL import Image, ImageDraw
 
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import (
@@ -137,6 +138,11 @@ class KUWindow(QWidget):
                         "background-color: cyan")
         save_folder.clicked.connect(self.select_save_folder)
         self.save_folder_text = QLineEdit()  ## db folder selection
+        
+        rgb_info = QPushButton("Save RGB and RoI")
+        rgb_info.setStyleSheet("color: black;"
+                        "background-color: cyan")
+        rgb_info.clicked.connect(self.save_rgb_roi)
                
         vi_info = QPushButton("Save VI and RoI")
         vi_info.setStyleSheet("color: black;"
@@ -164,6 +170,7 @@ class KUWindow(QWidget):
         hbox1.addWidget(save_folder, 2)
         hbox1.addWidget(self.save_folder_text, 6)
         hbox1.addSpacerItem(spaceItem1)
+        hbox1.addWidget(rgb_info, 2)
         hbox1.addWidget(vi_info, 2)
         hbox1.addWidget(exl, 2)
         
@@ -384,7 +391,7 @@ class KUWindow(QWidget):
         ''' [Function 2] box rep update '''        
                
         # define the brush
-        brush = QBrush(Qt.cyan, Qt.Dense6Pattern)   # Qt.BrushStyle : https://doc.qt.io/archives/qtjambi-4.5.2_01/com/trolltech/qt/core/Qt.BrushStyle.html | https://wikidocs.net/37095
+        brush = QBrush(Qt.cyan, Qt.NoBrush)   # Qt.BrushStyle : https://doc.qt.io/archives/qtjambi-4.5.2_01/com/trolltech/qt/core/Qt.BrushStyle.html | https://wikidocs.net/37095
         self.box.setBrush(brush)
         
         # Draw a rectangle item, setting the dimensions.
@@ -473,7 +480,138 @@ class KUWindow(QWidget):
             rot_ptrs_list.insert(0, [[rot_x1, rot_y1], [rot_x2, rot_y2]])
             
         return rot_ptrs_list
-    
+
+
+    def crop_image_polygon(self, input_image_path, output_image_path, polygon_coords):
+        
+        original_image = Image.open(input_image_path)
+        original_image = original_image.resize((self.w, self.h))
+        
+
+        # 새로운 이미지를 만들고 투명한 배경으로 설정
+        new_image = Image.new("RGBA", original_image.size, (0, 0, 0, 0))
+
+        # 다각형 좌표로 마스크 생성
+        mask = ImageDraw.Draw(new_image)
+        mask.polygon(polygon_coords, fill=(255, 255, 255, 255))
+
+        # 다각형 모양으로 이미지 자르기
+        result = Image.alpha_composite(original_image.convert("RGBA"), new_image)
+
+        # 결과 이미지 저장
+        result.save(output_image_path, "PNG")
+
+
+    ## RGB 범위만 가능!  # Result = average pixcel value and xy-coordinates                
+    def save_rgb_roi(self):
+                
+        im_rgb = cv2.imread(self.file_path, 1)
+        im = cv2.cvtColor(im_rgb, cv2.COLOR_BGR2GRAY)
+        
+        im_rgb = cv2.resize(im_rgb, (self.w, self.h), cv2.INTER_LINEAR)
+        im = cv2.resize(im, (self.w, self.h), cv2.INTER_LINEAR)    
+                   
+        # bin_total = np.zeros(im.shape, np.uint8) 
+        # print('bin_total:', bin_total)
+        
+        ## Reset the dictionary
+        self.box_vi_dict = {} 
+        self.box_json_dict = {}  # [sol]
+        self.box_json_dict['filename'] = self.file_name  # instead, from collections import OrderedDict
+        
+        for box_id, box_lines in self.box_dict.items():  # for key,value in dict.items()
+            
+            value = box_lines[0]
+            box = box_lines[1]
+            
+            x1,y1 = box.pos().x(), box.pos().y()  #  @ https://doc.qt.io/qt-5/qrectf.html
+            # x5,y5 = box.pos().x()+self.w_box, box.pos().y()
+            # x6,y6 = box.pos().x()+self.w_box, box.pos().y()+self.h_box
+            x10,y10 = box.pos().x(), box.pos().y()+self.h_box
+                        
+            rot_x1, rot_y1 = self.RotateCoordinate([x1,y1], value, [x1,y1])    
+            # rot_x5, rot_y5 = self.RotateCoordinate([x5,y5], value, [x1,y1])    
+            # rot_x6, rot_y6 = self.RotateCoordinate([x6,y6], value, [x1,y1])    
+            rot_x10, rot_y10 = self.RotateCoordinate([x10,y10], value, [x1,y1])    
+                        
+            ## lines
+            rot_ptrs_list = self.lines_ptrs(self.box_rep_num, x1, y1, value)
+            rot_ptrs_list.insert(0, [[rot_x1, rot_y1], [rot_x10, rot_y10]])
+            
+            box_ptrs_list = []
+            for i in range(self.box_rep_num):
+                
+                box_ptrs_list.append(np.array([rot_ptrs_list[i][0], rot_ptrs_list[i+1][0], rot_ptrs_list[i+1][1], rot_ptrs_list[i][1]], np.int32))
+                
+            # print('box_ptrs_list : ', box_ptrs_list)     
+                            
+            vi_list = []
+            bin_total = np.zeros(im.shape, np.uint8)
+            for box_ptrs in box_ptrs_list:
+                # print(box_ptrs)
+                
+                bin = np.zeros(im.shape, np.uint8)
+               
+                mask = cv2.fillPoly(bin, [box_ptrs], 255, cv2.LINE_AA)
+                mask_total = cv2.fillPoly(bin_total, [box_ptrs], 255, cv2.LINE_AA)
+                
+                # Verify
+                # print('im_rgb:', im_rgb.dtype, im_rgb.shape)
+                # print('mask_total:', mask_total.dtype, mask_total.shape)
+                
+                im_box = cv2.bitwise_and(im,im, mask=mask)
+                im_box_total = cv2.bitwise_and(im_rgb,im_rgb, mask=mask_total)          
+
+                # sum(vi)/sum(px) 구하기 
+                vi_px = cv2.countNonZero(im_box)
+                vi_list.append(vi_px)      
+                
+            # Crop each image: https://www.life2coding.com/cropping-polygon-or-non-rectangular-region-from-image-using-opencv-python/ 
+            save_each_path = self.save_dir + '/' + str(box_id) + '_' + self.file_name
+            # Flatten the nested list
+            flattened_list = []
+            for sublist in box_ptrs_list:
+                for point in sublist:
+                    flattened_list.append(point)
+
+            # Convert the list to a NumPy array if needed
+            flattened_array = np.array(flattened_list)
+            # Bounding Rectangle
+            rect = cv2.boundingRect(flattened_array) # returns (x,y,w,h) of the rect
+            # Save the Cropping
+            cropped = im_box_total[rect[1]: rect[1] + rect[3], rect[0]: rect[0] + rect[2]]
+            cv2.imwrite(save_each_path, cropped)
+            
+                
+            self.box_vi_dict[box_id]= vi_list
+            
+            conv_box_ptrs_list = [arr.tolist() for arr in box_ptrs_list]
+            self.box_json_dict[box_id]= conv_box_ptrs_list
+        # print('self.box_vi_dict:', self.box_vi_dict)
+        # print('self.box_json_dict:', self.box_json_dict)
+       
+        ## show on table_db
+        self.setTableWidgetData(self.box_vi_dict)
+        
+        self.box_vi_dict['filename'] = self.file_name
+        # self.box_json_dict['filename'] = self.file_name
+        
+        self.box_vi_list.append(self.box_vi_dict) 
+        self.box_json_list.append(self.box_json_dict) 
+               
+        self.data = self.box_vi_list
+        self.json = self.box_json_list
+        # print('self.data : ', self.data)
+        # print('self.json : ', self.json)
+        
+        ## 스크린 샷 -> 번호 적힌 이미지 저장
+        self.save_img()    
+        
+        ## 완료한 이미지, 배경색 바꾸기!
+        self.cell_bg_color()   
+        
+        # QMessageBox.information(self, "QMessageBox", "Successfully Saved the Data!")
+            
     ## vi 범위만 가능!  # Result = average vi value                
     def save_vi_roi(self):
                 
@@ -595,6 +733,7 @@ class KUWindow(QWidget):
         try:
             # path
             save_img_path = self.save_dir + '/' + self.file_name
+            # save_mask_path = self.save_dir + '/mask_' + self.file_name
             
             # ScreenShot 
             p = QScreen.grabWindow(app.primaryScreen(), w.winId())  #(main, current)
@@ -602,6 +741,9 @@ class KUWindow(QWidget):
             
         except TypeError as e:
             QMessageBox.information(self, "Error", 'Make the Output Folder Path!')
+
+        # crop img save
+        # cv2.imwrite(save_mask_path, im_box_total)
                 
     def cell_bg_color(self):
     
