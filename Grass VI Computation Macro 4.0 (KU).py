@@ -179,7 +179,7 @@ class KUWindow(QWidget):
 
         # hbox3 ; horizontal
         ''' [Function 1] box size update '''
-        w_box, h_box = 185, 125   # default size 
+        w_box, h_box = 65, 65  # default size # replace
         
         self.label_w_box = QLabel(self)
         self.label_w_box.setText('Box Width : ')
@@ -193,7 +193,7 @@ class KUWindow(QWidget):
         ''' [Function 2] box rep update '''
         self.label_box_rep = QLabel(self)
         self.label_box_rep.setText('Box REP : ')
-        self.line_edit_box_rep = QLineEdit('4', self)   # default is just a basic box
+        self.line_edit_box_rep = QLineEdit('1', self)   # replace # default is just a basic box
         ''' [Function 2] box rep update '''
                 
         ''' [Function 3] box name update '''
@@ -732,8 +732,7 @@ class KUWindow(QWidget):
         
         try:
             # path
-            save_img_path = self.save_dir + '/' + self.file_name
-            # save_mask_path = self.save_dir + '/mask_' + self.file_name
+            save_img_path = os.path.join(self.save_dir, self.file_name)
             
             # ScreenShot 
             p = QScreen.grabWindow(app.primaryScreen(), w.winId())  #(main, current)
@@ -755,8 +754,8 @@ class KUWindow(QWidget):
         df.set_index('filename', inplace=True)   # filename 열을 인덱스로 지정
         
         # Save path
-        save_exl_path = self.save_dir + '/' + self.folder_name + '.xlsx' 
-        save_json_path = self.save_dir + '/' + self.folder_name + '.json' 
+        save_exl_path = os.path.join(self.save_dir, self.folder_name + '.xlsx') 
+        save_json_path = os.path.join(self.save_dir, self.folder_name + '.json') 
         
         ## Save VI as Excel file
         writer = pd.ExcelWriter(save_exl_path, engine='xlsxwriter')
