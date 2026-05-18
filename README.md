@@ -4,12 +4,6 @@
 > definition and vegetation index (VI) extraction from non-georeferenced
 > multispectral turfgrass imagery.**
 
-This tool is described in the following publication:
-
-> Ku, K., Tuan, T. T., & Ahn, J. (2025). Development of a Flexible ROI
-> Analysis Software for Improving Spatial Consistency in Turfgrass
-> Time-Series Phenotyping. *Crop Science*.
-
 ---
 
 ## Table of Contents
