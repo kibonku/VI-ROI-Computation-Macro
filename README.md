@@ -17,9 +17,8 @@
    - [5.2 Batch Script — JSON to VI Computation](#52-batch-script--json-to-vi-computation)
 6. [Input / Output Formats](#6-input--output-formats)
 7. [Workflow Summary](#7-workflow-summary)
-8. [Citation](#8-citation)
-9. [License](#9-license)
-10. [References](#10-references)
+8. [License](#9-license)
+9. [References](#10-references)
 
 ---
 
@@ -252,32 +251,14 @@ Multispectral VI rasters (NDVI / NDRE / SAVI *.tif)
 
 ---
 
-## 8. Citation
-
-If you use this software in your research, please cite:
-
-```bibtex
-@article{ku2025viroi,
-  author  = {Ku, Kibon and Tuan, Thai Thanh and Ahn, Jinhyun},
-  title   = {Development of a Flexible {ROI} Analysis Software for
-             Improving Spatial Consistency in Turfgrass Time-Series
-             Phenotyping},
-  journal = {Crop Science},
-  year    = {2025},
-  url     = {https://github.com/kibonku/VI-ROI-Computation-Macro}
-}
-```
-
----
-
-## 9. License
+## 8. License
 
 This project is licensed under the terms of the **MIT License**.
 See [LICENSE](LICENSE) for details.
 
 ---
 
-## 10. References
+## 9. References
 
 - Qt documentation: https://doc.qt.io/qt-5/qtexamplesandtutorials.html
 - OpenCV documentation: https://docs.opencv.org/4.5.2/
